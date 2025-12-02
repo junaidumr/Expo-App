@@ -1,7 +1,6 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
-import { blue } from 'react-native-reanimated/lib/typescript/Colors'
 import { router } from 'expo-router'
+import React from 'react'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 const third = () => {
   return (
@@ -23,16 +22,16 @@ const third = () => {
       </View>
 
       <View>
-        <TouchableOpacity style={{ width:50, height: 60, justifyContent: "center", alignItems: "center", borderRadius: 10, position: "absolute", left: -200, top: -365 }} onPress={()=> router.push("./login")}>
+        <TouchableOpacity style={{ width: 50, height: 60, justifyContent: "center", alignItems: "center", borderRadius: 10, position: "absolute", left: -200, top: -365 }} onPress={() => router.replace("/login")}>
           <Text style={{ color: "white", fontSize: 20 }}>Skip</Text>
         </TouchableOpacity>
       </View>
       <View>
-        <TouchableOpacity style={{ width:50, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", position: "absolute", top: 280, left: -180, backgroundColor:"blue" }} onPress={()=> router.push("./SecondPage")}>
+        <TouchableOpacity style={{ width: 50, height: 40, borderRadius: 10, alignItems: "center", justifyContent: "center", position: "absolute", top: 340, left: -180, backgroundColor: "blue" }} onPress={() => router.push("/(tabs)/SecondPage")}>
           <Text style={{ color: "white", fontSize: 15 }}>Back</Text>
         </TouchableOpacity>
         <View>
-          <TouchableOpacity style={{ width:50, height:40,borderRadius:10, backgroundColor:"#8875FF", justifyContent:"center" ,position:"absolute", top:280 , left:125,alignItems:"center"}}onPress={()=>router.push("./fourth")}> 
+          <TouchableOpacity style={{ width: 50, height: 40, borderRadius: 10, backgroundColor: "#8875FF", justifyContent: "center", position: "absolute", top: 340, left: 125, alignItems: "center" }} onPress={() => router.push("/(tabs)/fourth")}>
             <Text>
               Next
             </Text>

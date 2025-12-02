@@ -1,6 +1,6 @@
-import { router, Router } from 'expo-router'
-import { View, Text, Image, TouchableOpacity, ScrollView, Modal, TextInput, Alert } from 'react-native'
-import React, { use, useState } from 'react'
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const profile = () => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -162,13 +162,14 @@ const profile = () => {
                     </Modal>
 
                 </View>
+
+                <TouchableOpacity onPress={() => router.push("/NotificationTest")} style={{ marginTop: 15, marginBottom: 5, backgroundColor: '#363636', padding: 10, borderRadius: 5, width: '90%', alignItems: 'center' }}>
+                    <Text style={{ color: "white", fontSize: 16, fontWeight: 'bold' }}>🔔 Test Notifications</Text>
+                </TouchableOpacity>
                 <TouchableOpacity>
                     <Image source={require("../../assets/images/account3.png")} />
                 </TouchableOpacity>
                 <Text style={{ color: "white" }}>Uptodo</Text>
-
-
-
 
 
                 <View>
@@ -211,20 +212,20 @@ const profile = () => {
                     </TouchableOpacity>
                     <Modal visible={modalVisible3} animationType="slide" transparent onRequestClose={() => setModalVisible3(false)}>
                         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", alignContent: "center" }}>
-                            <View style={{ width: "100%", height: 400, backgroundColor: "#6082B6", justifyContent:"center", borderRadius:20, alignItems:"center" }}>
-                                <View style={{ alignItems:"center", justifyContent:"center"}}>
-                                <Text style={{fontSize:20, fontWeight:"bold", justifyContent:"center", alignSelf:"center", alignItems:"center"  }}>
-                                    Help & Feedback
-                                    If you face any problem while using the app or have suggestions to improve it, please share your feedback with us.
-                                    You can contact our support team at support@example.com
-                                    or use the form below to send your message.
-                                    We value your opinion and try our best to respond as soon as possible.
-                                </Text>
-                                <TouchableOpacity onPress={()=> setModalVisible3(false)} style={{ width:60, height:40 , backgroundColor:"blue"}}>
-                                    <Text style={{alignItems:"center"}}>
-                                        Got it 
+                            <View style={{ width: "100%", height: 400, backgroundColor: "#6082B6", justifyContent: "center", borderRadius: 20, alignItems: "center" }}>
+                                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                                    <Text style={{ fontSize: 20, fontWeight: "bold", justifyContent: "center", alignSelf: "center", alignItems: "center" }}>
+                                        Help & Feedback
+                                        If you face any problem while using the app or have suggestions to improve it, please share your feedback with us.
+                                        You can contact our support team at support@example.com
+                                        or use the form below to send your message.
+                                        We value your opinion and try our best to respond as soon as possible.
                                     </Text>
-                                </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => setModalVisible3(false)} style={{ width: 60, height: 40, backgroundColor: "blue" }}>
+                                        <Text style={{ alignItems: "center" }}>
+                                            Got it
+                                        </Text>
+                                    </TouchableOpacity>
                                 </View>
 
                             </View>
@@ -239,7 +240,7 @@ const profile = () => {
                     <Image source={require("../../assets/images/uptodo4.png")} />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("./login")}>
+                <TouchableOpacity onPress={() => router.replace("/login")}>
                     <Image source={require("../../assets/images/uptodo5.png")} />
                 </TouchableOpacity>
             </View>

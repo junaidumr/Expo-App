@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "UpTodo",
+    "slug": "expoapp",
+    "owner": "junaidumr",
+    "scheme": "myapp",
+    "extra": {
+      "eas": {
+        "projectId": "ac122a0a-5865-4d97-accc-7e05fb0ca639"
+      }
+    }
+  }
+}

@@ -1,14 +1,16 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { Stack } from 'expo-router'
+import { Tabs } from 'expo-router';
 
-const layout = () => {
-  return (
-    <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="SecondPage" options={{headerShown: false   }} />
-      </Stack>
-  )
+export default function TabsLayout() {
+    return (
+        <Tabs screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}>
+            <Tabs.Screen name="index" options={{ headerShown: false }} />
+            <Tabs.Screen name="SecondPage" options={{ headerShown: false }} />
+            <Tabs.Screen name="third" options={{ headerShown: false }} />
+            <Tabs.Screen name="fourth" options={{ headerShown: false }} />
+            <Tabs.Screen name="fifth" options={{ headerShown: false }} />
+            <Tabs.Screen name="home" options={{ headerShown: false }} />
+            <Tabs.Screen name="focus" options={{ headerShown: false }} />
+            <Tabs.Screen name="profile" options={{ headerShown: false }} />
+        </Tabs>
+    );
 }
-
-export default layout

@@ -1,77 +1,139 @@
-import React, { useState } from "react";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
   Button,
-  Modal,
-  TextInput,
   FlatList,
+  Image,
+  Keyboard,
+  Modal,
   Platform,
   ScrollView,
-  Keyboard,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import DateTimePicker from "@react-native-community/datetimepicker";
-
+import { supabase } from "../../migration/supabase";
+import { Task } from "../utils/types";
 export default function Home() {
   const router = useRouter();
 
-  // States
   const [modalVisible, setModalVisible] = useState(false);
   const [step, setStep] = useState(1);
   const [task, setTask] = useState("");
-  const [tasks, setTasks] = useState<
-    { text: string; reminder: string; time: string; priority: string }[]
-  >([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [priority, setPriority] = useState("⭐️⭐️");
   const [showPicker, setShowPicker] = useState(false);
   const [pickerMode, setPickerMode] = useState<"date" | "time">("date");
 
-  // ✅ FIXED SAVE TASK
-  const saveTask = () => {
+  // Fetch tasks and register for push notifications
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData?.user?.id;
+      if (!userId) return;
+
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) console.log(error.message);
+      else setTasks(data || []);
+
+      // Register for push notifications
+      registerForPushNotificationsAsync(userId);
+    };
+
+    fetchTasks();
+  }, []);
+
+  async function registerForPushNotificationsAsync(userId: string) {
+    if (!Device.isDevice) {
+      console.log('Must use a physical device for push notifications');
+      return;
+    }
+
+    try {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== 'granted') {
+        console.log('Failed to get push token for push notification!');
+        return;
+      }
+
+      const tokenData = await Notifications.getExpoPushTokenAsync();
+      console.log('Expo push token:', tokenData.data);
+
+      if (tokenData.data) {
+        const { error } = await supabase
+          .from('users')
+          .update({ expo_token: tokenData.data })
+          .eq('uid', userId);
+
+        if (error) console.log('Error updating user token:', error.message);
+      }
+    } catch (error) {
+      console.log('Error getting push token:', error);
+    }
+  }
+
+  const saveTaskToSupabase = async (newTask: Task) => {
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+    if (!userId) return;
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert([{ ...newTask, user_id: userId }])
+      .select();
+
+    if (error) console.log("Error inserting task:", error.message);
+    else setTasks(prev => [...prev, data?.[0]!]);
+  };
+
+  const saveTask = async () => {
     if (!task.trim()) return;
 
-    const newTask = {
+    const newTask: Task = {
       text: task.trim(),
-      reminder: date.toDateString(),
+      reminder: date.toISOString().split("T")[0],
       time: time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       priority,
     };
 
-    // Close keyboard and picker
     Keyboard.dismiss();
     setShowPicker(false);
+    setModalVisible(false);
 
-    // Add new task and close modal after a short delay
-    setTasks((prevTasks) => {
-      const updatedTasks = [...prevTasks, newTask];
-      setModalVisible(false);
-      // Reset form after modal closes
-      setTimeout(() => {
-        setTask("");
-        setStep(1);
-        setDate(new Date());
-        setTime(new Date());
-        setPriority("⭐️⭐️");
-      }, 100);
-      return updatedTasks;
-    });
+    await saveTaskToSupabase(newTask);
+
+    setTask("");
+    setStep(1);
+    setDate(new Date());
+    setTime(new Date());
+    setPriority("⭐️⭐️");
   };
 
-  // 🗑️ Delete Task
   const deleteTask = (index: number) => {
-    setTasks((prev) => prev.filter((_, i) => i !== index));
+    setTasks(prev => prev.filter((_, i) => i !== index));
   };
 
-  // 📅 Date/Time Picker
   const onChangeDateTime = (event: any, selectedDate?: Date) => {
     if (selectedDate) {
-      if (pickerMode === "date") setDate(selectedDate);
-      else setTime(selectedDate);
+      pickerMode === "date" ? setDate(selectedDate) : setTime(selectedDate);
     }
     setShowPicker(false);
   };
@@ -94,7 +156,7 @@ export default function Home() {
         <View style={{ flex: 1, padding: 20 }}>
           <FlatList
             data={tasks}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={item => item.id?.toString() || Math.random().toString()}
             renderItem={({ item, index }) => (
               <View
                 style={{
@@ -125,7 +187,6 @@ export default function Home() {
         </View>
       )}
 
-      {/* Bottom Navigation */}
       <View
         style={{
           flexDirection: "row",
@@ -136,14 +197,12 @@ export default function Home() {
           paddingHorizontal: 25,
         }}
       >
-        <TouchableOpacity onPress={() => router.push("/profile")}>
+        <TouchableOpacity>
           <Image source={require("../../assets/images/index.png")} />
-          <Text></Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/onboarding/calendar")}>
           <Image source={require("../../assets/images/calendar.png")} />
-          
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -164,11 +223,11 @@ export default function Home() {
           <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }}>+</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("./focus")}>
+        <TouchableOpacity onPress={() => router.push("/(tabs)/focus")}>
           <Image source={require("../../assets/images/clock.png")} />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/profile")}>
+        <TouchableOpacity onPress={() => router.push("/(tabs)/profile")}>
           <Image source={require("../../assets/images/user.png")} />
         </TouchableOpacity>
       </View>
@@ -197,7 +256,7 @@ export default function Home() {
                 width: "100%",
               }}
             >
-              {/* Step 1: Enter Task */}
+
               {step === 1 && (
                 <>
                   <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
@@ -222,7 +281,6 @@ export default function Home() {
                 </>
               )}
 
-              {/* Step 2: Date Picker */}
               {step === 2 && (
                 <>
                   <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
@@ -243,7 +301,6 @@ export default function Home() {
                 </>
               )}
 
-              {/* Step 3: Time Picker */}
               {step === 3 && (
                 <>
                   <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
@@ -266,16 +323,15 @@ export default function Home() {
                 </>
               )}
 
-              {/* Step 4: Priority */}
               {step === 4 && (
                 <>
                   <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10 }}>
-                    Select Prioriy
+                    Select Priority
                   </Text>
                   <View
                     style={{ flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 15 }}
                   >
-                    {[1, 2, 3, 4, 5].map((n) => (
+                    {[1, 2, 3, 4, 5].map(n => (
                       <Button
                         key={n}
                         title={"⭐️".repeat(n)}
@@ -284,13 +340,7 @@ export default function Home() {
                     ))}
                   </View>
                   <Text>Selected: {priority}</Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginTop: 15,
-                    }}
-                  >
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 15 }}>
                     <Button title="Back" onPress={() => setStep(3)} />
                     <Button title="Save Task" onPress={saveTask} />
                   </View>
@@ -300,7 +350,6 @@ export default function Home() {
           </ScrollView>
         </View>
 
-        {/* Date/Time Picker */}
         {showPicker && (
           <View
             style={{

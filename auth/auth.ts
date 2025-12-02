@@ -1,5 +1,5 @@
 // testAuth.ts
-import { supabase } from './supabase'
+import { supabase } from '../migration/supabase'
 
 async function testLogin() {
   const email = 'test@example.com'
