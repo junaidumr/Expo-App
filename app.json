@@ -6,8 +6,10 @@
     "scheme": "myapp",
     "extra": {
       "eas": {
-        "projectId": "ac122a0a-5865-4d97-accc-7e05fb0ca639" 
-      }
+        "projectId": "ac122a0a-5865-4d97-accc-7e05fb0ca639"
+      },
+      "androidClientId": "990839213604-94t8i7dek34k7e254fck9kntfs2557cp.apps.googleusercontent.com",
+      "iosUrlScheme": "com.googleusercontent.apps.990839213604-lrlegu53lkbmcucnkojufg30trsir67k"
     }
   }
 }

@@ -7,6 +7,7 @@ const profile = () => {
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
     const [modalVisible3, setModalVisible3] = useState(false);
+    const [modalVisible4, setModalVisible4] = useState(false);
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: "black" }}>
@@ -48,11 +49,11 @@ const profile = () => {
                                     <TouchableOpacity onPress={() => setModalVisible2(false)}>
                                         <Text style={{ color: "white", fontSize: 20 }}>Tack picture </Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={() => Alert.alert("Import from gallery")}>
 
                                         <Text style={{ color: "white", fontSize: 20 }}>Import from gallery</Text>
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={() => Alert.alert("Import from Google Drive")}>
 
                                         <Text style={{ color: "white", fontSize: 20 }}>Import from Google Drive</Text>
                                     </TouchableOpacity>
@@ -148,10 +149,10 @@ const profile = () => {
 
                 <View style={{}}>
 
-                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                    <TouchableOpacity onPress={() => setModalVisible4(true)}>
                         <Image source={require("../../assets/images/account2.png")} />
                     </TouchableOpacity>
-                    <Modal visible={modalVisible} animationType='fade' transparent onRequestClose={() => setModalVisible(false)}>
+                    <Modal visible={modalVisible4} animationType='fade' transparent onRequestClose={() => setModalVisible4(false)}>
                         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#rgba(0,0,0,0.5)", width: 100 }}>
                             <View style={{ width: 100 }}>
 
@@ -166,7 +167,7 @@ const profile = () => {
                 <TouchableOpacity onPress={() => router.push("/NotificationTest")} style={{ marginTop: 15, marginBottom: 5, backgroundColor: '#363636', padding: 10, borderRadius: 5, width: '90%', alignItems: 'center' }}>
                     <Text style={{ color: "white", fontSize: 16, fontWeight: 'bold' }}>🔔 Test Notifications</Text>
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => Alert.alert("Feature coming soon")}>
                     <Image source={require("../../assets/images/account3.png")} />
                 </TouchableOpacity>
                 <Text style={{ color: "white" }}>Uptodo</Text>
@@ -201,7 +202,7 @@ const profile = () => {
 
 
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => Alert.alert("Feature coming soon")}>
                     <Image source={require("../../assets/images/uptodo2.png")} />
                 </TouchableOpacity>
 
@@ -236,7 +237,7 @@ const profile = () => {
                 </View>
 
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => Alert.alert("Feature coming soon")}>
                     <Image source={require("../../assets/images/uptodo4.png")} />
                 </TouchableOpacity>
 

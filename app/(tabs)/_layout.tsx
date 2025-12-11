@@ -8,7 +8,6 @@ export default function TabsLayout() {
             <Tabs.Screen name="third" options={{ headerShown: false }} />
             <Tabs.Screen name="fourth" options={{ headerShown: false }} />
             <Tabs.Screen name="fifth" options={{ headerShown: false }} />
-            <Tabs.Screen name="home" options={{ headerShown: false }} />
             <Tabs.Screen name="focus" options={{ headerShown: false }} />
             <Tabs.Screen name="profile" options={{ headerShown: false }} />
         </Tabs>

@@ -11,7 +11,7 @@ const SecondPage = () => {
 
       <Image source={require('../../assets/images/lastimage.png')} style={{ width: 160, position: "absolute", top: 585 }} />
 
-      <TouchableOpacity onPress={() => router.replace("/login")} style={{
+      <TouchableOpacity onPress={() => router.push("/login")} style={{
         alignItems: "flex-start", justifyContent: "flex-start"
       }}>
         <Text style={{ color: "white", padding: 10, borderRadius: 10, position: "relative", top: -465, left: -160 }}> Skip </Text>

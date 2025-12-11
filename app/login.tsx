@@ -1,66 +1,192 @@
+import * as Google from 'expo-auth-session/providers/google';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, Button, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 import { supabase } from '../migration/supabase';
+
+WebBrowser.maybeCompleteAuthSession();
+
+
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState('junaidaziz189@gmail.com');
-  const [password, setPassword] = useState('Junaid189');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) return Alert.alert('Error', 'Enter email and password');
+  // Configure Google Auth
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: '990839213604-qsif18lrs8g9e1t4elgg9kaatsqcflhl.apps.googleusercontent.com',
+    androidClientId: '990839213604-94t8i7dek34k7e254fck9kntfs2557cp.apps.googleusercontent.com',
+    webClientId: '990839213604-qsif18lrs8g9e1t4elgg9kaatsqcflhl.apps.googleusercontent.com',
+    redirectUri: 'https://auth.expo.io/@junaidumr/expoapp',
+  });
 
+  // Handle Google Sign-In response
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      if (authentication?.idToken) {
+        handleGoogleSignInSuccess(authentication.idToken);
+      }
+    }
+  }, [response]);
+
+  const handleGoogleSignInSuccess = async (idToken: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: idToken,
+      });
+
       if (error) {
-        Alert.alert('Login Failed', error.message);
+        console.log('Supabase sign-in error:', error);
+        Alert.alert('Sign-In Failed', error.message || 'Failed to authenticate with Google');
         return;
       }
 
-      const user = data.user;
-      if (!user) {
-        Alert.alert('Login Failed', 'No user data returned');
-        return;
+      if (data.user) {
+        Alert.alert('Success', 'Google Sign-In Successful!', [
+          { text: 'OK', onPress: () => router.replace('/(tabs)/home') },
+        ]);
       }
-
-      // Navigate immediately to avoid waiting for notifications
-      router.replace('/(tabs)/home');
-
-    } catch (err) {
-      Alert.alert('Error', 'An unexpected error occurred during login');
-      console.log('Login error:', err);
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      Alert.alert('Error', err?.message || 'Something went wrong');
     }
   };
 
+  const handleGooglesignIn = async () => {
+    try {
+      await promptAsync();
+    } catch (error) {
+      console.error('Error prompting Google sign-in:', error);
+      Alert.alert('Error', 'Failed to open Google Sign-In');
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      return Alert.alert('Error', 'Enter email and password');
+    }
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        console.log('Login error:', error);
+        return Alert.alert('Login Failed', error.message || 'Invalid credentials');
+      }
+
+      const user = data.user;
+
+      if (!user) {
+        return Alert.alert('Login Failed', 'No user data returned');
+      }
+
+      if (!user.email_confirmed_at) {
+        return Alert.alert(
+          'Email Not Verified',
+          'Please check your email and click the confirmation link before logging in.'
+        );
+      }
+
+      Alert.alert('Success', 'Login Successful!', [
+        { text: 'OK', onPress: () => router.replace('/(tabs)/home') },
+      ]);
+    } catch (err: any) {
+      console.log('Login error:', err);
+      Alert.alert('Login Error', err?.message || 'Unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text>Email:</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>Email:</Text>
       <TextInput
         value={email}
         onChangeText={setEmail}
         placeholder="Enter email"
         keyboardType="email-address"
         autoCapitalize="none"
-        style={{ borderWidth: 1, marginBottom: 10, padding: 8 }}
+        style={styles.input}
       />
-      <Text>Password:</Text>
+
+      <Text style={styles.label}>Password:</Text>
       <TextInput
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         placeholder="Enter password"
-        style={{ borderWidth: 1, marginBottom: 20, padding: 8 }}
+        style={styles.input}
       />
 
-      <TouchableOpacity>
-        <Text style={{ color: 'blue', marginBottom: 20 }}>Forgot Password?</Text>
+      <TouchableOpacity onPress={() => router.push("/Loginwithotp")} style={{ marginBottom: 20 }}>
+        <Text style={{ color: 'blue' }}>Login with OTP</Text>
       </TouchableOpacity>
 
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Register Now" onPress={() => router.push('/Register')} />
+      <TouchableOpacity onPress={() => router.push("/ForgotPassword")} style={{ marginBottom: 20 }}>
+        <Text style={{ color: "red" }}>
+          Forgot Password?
+        </Text>
+      </TouchableOpacity>
 
+      <Button title={loading ? 'Logging in...' : 'Login'} onPress={handleLogin} disabled={loading} />
+      <View style={{ marginTop: 10 }}>
+        <Button title="Register Now" onPress={() => router.push('/Register')} />
+      </View>
+
+      <View style={styles.loginOptions}>
+        <TouchableOpacity style={styles.Image} onPress={handleGooglesignIn}>
+          <Image source={require("../assets/images/loginwithgoogle.png")} />
+          <Text style={styles.registerText}>Register with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.Image}>
+          <Image source={require("../assets/images/loginwithapple.png")} />
+          <Text style={styles.registerText}>
+            Register with Apple
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
-
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#fff' },
+  label: { marginBottom: 5, fontWeight: 'bold' },
+  input: { borderWidth: 1, borderColor: '#deafafff', padding: 10, marginBottom: 15, borderRadius: 5 },
+
+  Image: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+
+  },
+
+  registerText: {
+    top: -32, left: 10, color: 'blue'
+  },
+  // AppleImage:{
+  //   justifyContent:'center',
+  //   alignItems:'center',
+  //   marginTop:10,
+  //    borderRadius:20,
+  //   borderWidth:1
+
+  // },
+
+  loginOptions: {
+
+  },
+
+
+});
